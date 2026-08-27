@@ -9,6 +9,7 @@ from agente import MotorAnalisis
 app = Flask(__name__)
 BASE_DIR = Path(__file__).resolve().parent
 FRONT_DIR = BASE_DIR / "front"
+COLUMNAS_NO_ANALITICAS = {"no", "id", "year", "month", "day", "hour"}
 
 # Asegúrate de que esta ruta sea la correcta para tu archivo
 CSV_PATH = '../data/PRSA_Data_Wanshouxigong_20130301-20170228.csv'
@@ -84,10 +85,16 @@ def diagnostico_calidad():
     # 1. Nulos
     nulos_detalle = df.isnull().sum()
     nulos_dict = nulos_detalle[nulos_detalle > 0].to_dict()
+    nulos_porcentaje = (
+        (nulos_detalle[nulos_detalle > 0] / len(df) * 100).round(2).to_dict()
+    )
     
     # 2. Outliers (Método IQR)
     outliers_dict = {}
-    numericas = df.select_dtypes(include=[np.number]).columns
+    numericas = [
+        col for col in df.select_dtypes(include=[np.number]).columns
+        if col.lower() not in COLUMNAS_NO_ANALITICAS
+    ]
     for col in numericas:
         Q1 = df[col].quantile(0.25)
         Q3 = df[col].quantile(0.75)
@@ -108,7 +115,9 @@ def diagnostico_calidad():
     return jsonify({
         "filas": int(df.shape[0]),
         "nulos": nulos_dict,
+        "nulos_porcentaje": nulos_porcentaje,
         "outliers": outliers_dict,
+        "tipos_variables": df.dtypes.astype(str).to_dict(),
         "estructura_temporal": estado_temporal
     })
 
@@ -130,6 +139,77 @@ def taxonomia_variables():
             taxonomia["categoricas"].append(col)
             
     return jsonify(taxonomia)
+
+
+@app.route('/api/analisis-escalado-transformacion', methods=['GET'])
+def analisis_escalado_transformacion():
+    """Resumen matemático de Pandas; no transforma ninguna columna."""
+    objetivo = str(request.args.get("objetivo", "")).lower()
+    # Se revisan todas las variables numéricas analíticas. Se excluyen índices y
+    # componentes de fecha porque no son medidas comparables para normalización.
+    columnas = [
+        col for col in df.select_dtypes(include=[np.number]).columns
+        if col.lower() not in COLUMNAS_NO_ANALITICAS
+    ]
+
+    resumen = {}
+    for col in columnas:
+        serie = df[col].dropna()
+        if serie.empty:
+            continue
+        minimo = float(serie.min())
+        maximo = float(serie.max())
+        resumen[col] = {
+            "min": round(minimo, 4),
+            "max": round(maximo, 4),
+            "rango": round(maximo - minimo, 4),
+            "desviacion_estandar": round(float(serie.std()), 4),
+        }
+
+    rangos = [item["rango"] for item in resumen.values() if item["rango"] > 0]
+    relacion_rangos = round(max(rangos) / min(rangos), 4) if rangos else 1
+    amerita_escalado = len(resumen) >= 2 and relacion_rangos >= 10
+    columnas_fecha_separadas = [
+        col for col in ["year", "month", "day", "hour"] if col in df.columns
+    ]
+    columnas_fecha_texto = [
+        col for col in df.columns
+        if ("date" in col.lower() or "fecha" in col.lower() or "time" in col.lower())
+        and pd.api.types.is_object_dtype(df[col])
+    ]
+    columnas_temporales = columnas_fecha_separadas or columnas_fecha_texto
+    requiere_transformacion_temporal = bool(columnas_temporales)
+    return jsonify({
+        "objetivo_fase1": objetivo or "No especificado",
+        "variables_numericas_evaluadas": list(resumen),
+        "variables_excluidas_por_ser_indice_o_temporales": sorted(
+            col for col in df.columns if col.lower() in COLUMNAS_NO_ANALITICAS
+        ),
+        "resumen_estadistico": resumen,
+        "relacion_maxima_de_rangos": relacion_rangos,
+        "amerita_escalado_si_se_combinan_variables": amerita_escalado,
+        "interpretacion": (
+            "Las variables evaluadas tienen escalas muy diferentes; el escalado "
+            "debe considerarse si se usan conjuntamente en métodos sensibles a escala."
+            if amerita_escalado
+            else "No se detectó una diferencia de escala que obligue a escalar; "
+            "la decisión depende del método analítico posterior."
+        ),
+        "nota_transformacion": (
+            "Se recomienda construir una variable datetime a partir de las "
+            f"columnas {', '.join(columnas_fecha_separadas)} para análisis temporal."
+            if columnas_fecha_separadas
+            else (
+                "Las columnas temporales de texto requieren conversión a datetime: "
+                f"{', '.join(columnas_fecha_texto)}."
+                if columnas_fecha_texto
+                else "No se detectaron columnas temporales que requieran una "
+                "transformación evidente."
+            )
+        ),
+        "requiere_transformacion_temporal": requiere_transformacion_temporal,
+        "columnas_temporales_a_transformar": columnas_temporales,
+    })
 
 
 @app.route('/api/validar-pregunta', methods=['POST', 'OPTIONS'])
@@ -168,6 +248,48 @@ def prescribir_pregunta():
 
     motor = MotorAnalisis()
     return ejecutar_llm(lambda: motor.prescribir_pregunta(preguntas))
+
+
+@app.route('/api/fase2/evaluar-estrategia', methods=['POST', 'OPTIONS'])
+def evaluar_estrategia_fase2():
+    if request.method == 'OPTIONS':
+        return '', 204
+
+    datos = request.get_json(silent=True) or {}
+    propuesta = str(datos.get("propuesta", "")).strip()
+    intento_fallido = datos.get("intento_fallido", 0)
+    objetivo_fase1 = str(datos.get("objetivo_fase1", "")).strip()
+    nivel_forzado = datos.get("nivel_forzado")
+    if not propuesta:
+        return jsonify({"error": "La propuesta metodológica es obligatoria."}), 400
+    try:
+        intento_fallido = max(0, int(intento_fallido))
+    except (TypeError, ValueError):
+        return jsonify({"error": "El número de intento debe ser un entero."}), 400
+
+    motor = MotorAnalisis()
+    return ejecutar_llm(
+        lambda: motor.evaluar_estrategia_fase2(
+            propuesta, intento_fallido, objetivo_fase1, nivel_forzado
+        )
+    )
+
+
+@app.route('/api/fase2/explicar-alternativa-correcta', methods=['POST', 'OPTIONS'])
+def explicar_alternativa_correcta_fase2():
+    if request.method == 'OPTIONS':
+        return '', 204
+    datos = request.get_json(silent=True) or {}
+    alternativa = str(datos.get("alternativa", "")).strip()
+    objetivo_fase1 = str(datos.get("objetivo_fase1", "")).strip()
+    if not alternativa:
+        return jsonify({"error": "La alternativa es obligatoria."}), 400
+    motor = MotorAnalisis()
+    return ejecutar_llm(
+        lambda: motor.explicar_alternativa_correcta_fase2(
+            alternativa, objetivo_fase1
+        )
+    )
 
 if __name__ == '__main__':
     app.run(port=5000)

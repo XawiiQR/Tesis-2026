@@ -11,11 +11,31 @@ class MotorAnalisis:
         # La dirección base de tu servidor API
         self.base_url = "http://127.0.0.1:5000/api"
         self.client = OpenAI(base_url="https://api.groq.com/openai/v1")
+        # Alternativa a GPT-OSS cuando ese modelo alcanza su cupo diario en Groq.
+        self.modelo = "openai/gpt-oss-20b"
 
     def obtener_taxonomia(self):
         """Obtiene todas las variables disponibles, agrupadas por tipo."""
         response = requests.get(
             f"{self.base_url}/taxonomia-variables", timeout=15
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def obtener_diagnostico_calidad(self):
+        """Obtiene el resumen de calidad calculado por Pandas en la API local."""
+        response = requests.get(
+            f"{self.base_url}/diagnostico-calidad", timeout=30
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def obtener_analisis_escalado_transformacion(self, objetivo_fase1):
+        """Obtiene el resumen de escalado calculado por Pandas para el objetivo."""
+        response = requests.get(
+            f"{self.base_url}/analisis-escalado-transformacion",
+            params={"objetivo": objetivo_fase1},
+            timeout=30,
         )
         response.raise_for_status()
         return response.json()
@@ -32,7 +52,7 @@ class MotorAnalisis:
         mensaje = prompts.obtener_prompt_diagnostico(datos)
         # 4. Llamar al LLM
         respuesta = self.client.chat.completions.create(
-            model="openai/gpt-oss-20b",
+            model=self.modelo,
             messages=[{"role": "user", "content": mensaje}]
         )
         return respuesta.choices[0].message.content
@@ -49,7 +69,7 @@ class MotorAnalisis:
             
             # 3. Llamar al LLM para que analice y recomiende
             respuesta = self.client.chat.completions.create(
-                model="openai/gpt-oss-20b",
+                model=self.modelo,
                 messages=[{"role": "user", "content": mensaje}]
             )
             return respuesta.choices[0].message.content
@@ -63,7 +83,7 @@ class MotorAnalisis:
         mensaje = prompts.obtener_prompt_taxonomia(datos)
         
         respuesta = self.client.chat.completions.create(
-            model="openai/gpt-oss-20b",
+            model=self.modelo,
             messages=[{"role": "user", "content": mensaje}]
         )
         return respuesta.choices[0].message.content
@@ -74,7 +94,7 @@ class MotorAnalisis:
         mensaje = prompts.obtener_prompt_descripcion_variables(datos)
 
         respuesta = self.client.chat.completions.create(
-            model="openai/gpt-oss-20b",
+            model=self.modelo,
             messages=[{"role": "user", "content": mensaje}]
         )
         return respuesta.choices[0].message.content
@@ -86,7 +106,7 @@ class MotorAnalisis:
         mensaje = prompts.obtener_prompt_preguntas_relaciones(datos)
 
         respuesta = self.client.chat.completions.create(
-            model="openai/gpt-oss-20b",
+            model=self.modelo,
             messages=[{"role": "user", "content": mensaje}]
         )
         return respuesta.choices[0].message.content
@@ -100,7 +120,7 @@ class MotorAnalisis:
         mensaje = prompts.obtener_prompt_validacion_pregunta(pregunta, datos)
 
         respuesta = self.client.chat.completions.create(
-            model="openai/gpt-oss-20b",
+            model=self.modelo,
             messages=[{"role": "user", "content": mensaje}]
         )
         return respuesta.choices[0].message.content
@@ -111,7 +131,7 @@ class MotorAnalisis:
         mensaje = prompts.obtener_prompt_tres_preguntas_sugeridas(datos)
 
         respuesta = self.client.chat.completions.create(
-            model="openai/gpt-oss-20b",
+            model=self.modelo,
             messages=[{"role": "user", "content": mensaje}]
         )
         return respuesta.choices[0].message.content
@@ -122,7 +142,7 @@ class MotorAnalisis:
         mensaje = prompts.obtener_prompt_explicacion_pregunta_elegida(pregunta, datos)
 
         respuesta = self.client.chat.completions.create(
-            model="openai/gpt-oss-20b",
+            model=self.modelo,
             messages=[{"role": "user", "content": mensaje}]
         )
         return respuesta.choices[0].message.content
@@ -136,8 +156,47 @@ class MotorAnalisis:
         mensaje = prompts.obtener_prompt_prescripcion_pregunta(opciones, datos)
 
         respuesta = self.client.chat.completions.create(
-            model="openai/gpt-oss-20b",
+            model=self.modelo,
             messages=[{"role": "user", "content": mensaje}]
+        )
+        return respuesta.choices[0].message.content
+
+    def evaluar_estrategia_fase2(
+        self, propuesta_usuario, intento_fallido=0, objetivo_fase1="", nivel_forzado=None
+    ):
+        """Evalúa una estrategia sin recalcular el dataset en el LLM."""
+        if not propuesta_usuario.strip():
+            raise ValueError("La propuesta metodológica no puede estar vacía.")
+
+        variables_contexto = self.obtener_taxonomia()
+        diagnostico_calidad = self.obtener_diagnostico_calidad()
+        analisis_escalado_transformacion = (
+            self.obtener_analisis_escalado_transformacion(objetivo_fase1)
+        )
+        mensaje = prompts.obtener_prompt_evaluacion_fase2(
+            variables_contexto,
+            diagnostico_calidad,
+            analisis_escalado_transformacion,
+            int(intento_fallido),
+            propuesta_usuario,
+            nivel_forzado,
+        )
+        respuesta = self.client.chat.completions.create(
+            model=self.modelo,
+            messages=[{"role": "user", "content": mensaje}],
+        )
+        return respuesta.choices[0].message.content
+
+    def explicar_alternativa_correcta_fase2(self, alternativa, objetivo_fase1=""):
+        """Explica por qué una alternativa correcta prepara el dataset."""
+        diagnostico_calidad = self.obtener_diagnostico_calidad()
+        escalado = self.obtener_analisis_escalado_transformacion(objetivo_fase1)
+        mensaje = prompts.obtener_prompt_explicacion_alternativa_correcta_fase2(
+            alternativa, diagnostico_calidad, escalado
+        )
+        respuesta = self.client.chat.completions.create(
+            model=self.modelo,
+            messages=[{"role": "user", "content": mensaje}],
         )
         return respuesta.choices[0].message.content
     

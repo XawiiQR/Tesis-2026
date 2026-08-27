@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Data Understanding | Fase 1</title>
     <link rel="stylesheet" href="/front/styles.css" />
+    <link rel="stylesheet" href="/front/fase2.css" />
     <!-- D3 queda disponible para las visualizaciones que añadas después. -->
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   </head>
@@ -43,6 +44,14 @@
         <label for="question-input">Escribe tu pregunta o duda</label>
         <div class="input-row"><input id="question-input" autocomplete="off" placeholder="Ej. ¿Cómo cambia PM2.5 según la temperatura?" required /><button type="submit">Analizar <span>→</span></button></div>
         <p class="hint">El sistema valida si esta pregunta puede responderse con tu dataset.</p>
+      </form>
+    </template>
+     <template id="strategy-template">
+      <form class="question-form strategy-form">
+        <label for="strategy-input">Describe tu estrategia de calidad y preparación</label>
+        <textarea id="strategy-input" placeholder="Ej. Revisaré los valores nulos, transformaré las columnas de fecha y evaluaré los valores atípicos antes de analizar." required></textarea>
+        <div class="input-row"><button type="submit">Evaluar estrategia <span>→</span></button></div>
+        <p class="hint">El tutor evalúa la propuesta con el diagnóstico calculado por Python.</p>
       </form>
     </template>
     <script src="/front/app.js"></script>

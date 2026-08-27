@@ -1,0 +1,239 @@
+{
+  "fase_activa": "Fase 2: Estrategia, calidad y preparación",
+  "tiempo_limite_segundos": 30,
+  "objetivo_fase1": "Analizar la relación entre contaminantes y condiciones meteorológicas.",
+  "variables": {
+    "categoricas": [
+      "wd",
+      "station"
+    ],
+    "numericas": [
+      "No",
+      "PM2.5",
+      "PM10",
+      "SO2",
+      "NO2",
+      "CO",
+      "O3",
+      "TEMP",
+      "PRES",
+      "DEWP",
+      "RAIN",
+      "WSPM"
+    ],
+    "temporales": [
+      "year",
+      "month",
+      "day",
+      "hour"
+    ]
+  },
+  "diagnostico_calidad": {
+    "estructura_temporal": {
+      "columnas": [
+        "year",
+        "hour",
+        "day",
+        "month"
+      ],
+      "formato": "separado , necesita transformacion"
+    },
+    "filas": 35064,
+    "nulos": {
+      "CO": 1297,
+      "DEWP": 19,
+      "NO2": 754,
+      "O3": 1078,
+      "PM10": 484,
+      "PM2.5": 696,
+      "PRES": 19,
+      "RAIN": 19,
+      "SO2": 669,
+      "TEMP": 19,
+      "WSPM": 13,
+      "wd": 79
+    },
+    "nulos_porcentaje": {
+      "CO": 3.7,
+      "DEWP": 0.05,
+      "NO2": 2.15,
+      "O3": 3.07,
+      "PM10": 1.38,
+      "PM2.5": 1.98,
+      "PRES": 0.05,
+      "RAIN": 0.05,
+      "SO2": 1.91,
+      "TEMP": 0.05,
+      "WSPM": 0.04,
+      "wd": 0.23
+    },
+    "outliers": {
+      "CO": 2332,
+      "NO2": 582,
+      "O3": 1286,
+      "PM10": 1311,
+      "PM2.5": 1727,
+      "RAIN": 1361,
+      "SO2": 3191,
+      "WSPM": 1517
+    },
+    "tipos_variables": {
+      "CO": "float64",
+      "DEWP": "float64",
+      "NO2": "float64",
+      "No": "int64",
+      "O3": "float64",
+      "PM10": "float64",
+      "PM2.5": "float64",
+      "PRES": "float64",
+      "RAIN": "float64",
+      "SO2": "float64",
+      "TEMP": "float64",
+      "WSPM": "float64",
+      "day": "int64",
+      "hour": "int64",
+      "month": "int64",
+      "station": "str",
+      "wd": "str",
+      "year": "int64"
+    }
+  },
+  "analisis_escalado_transformacion": {
+    "amerita_escalado_si_se_combinan_variables": true,
+    "columnas_temporales_a_transformar": [
+      "year",
+      "month",
+      "day",
+      "hour"
+    ],
+    "interpretacion": "Las variables evaluadas tienen escalas muy diferentes; el escalado debe considerarse si se usan conjuntamente en métodos sensibles a escala.",
+    "nota_transformacion": "Se recomienda construir una variable datetime a partir de las columnas year, month, day, hour para análisis temporal.",
+    "objetivo_fase1": "analizar la relación entre contaminantes y condiciones meteorológicas.",
+    "relacion_maxima_de_rangos": 734.8485,
+    "requiere_transformacion_temporal": true,
+    "resumen_estadistico": {
+      "CO": {
+        "desviacion_estandar": 1223.1391,
+        "max": 9800.0,
+        "min": 100.0,
+        "rango": 9700.0
+      },
+      "DEWP": {
+        "desviacion_estandar": 13.7041,
+        "max": 28.5,
+        "min": -35.3,
+        "rango": 63.8
+      },
+      "NO2": {
+        "desviacion_estandar": 35.808,
+        "max": 251.0,
+        "min": 2.0,
+        "rango": 249.0
+      },
+      "O3": {
+        "desviacion_estandar": 57.0827,
+        "max": 358.0,
+        "min": 0.2142,
+        "rango": 357.7858
+      },
+      "PM10": {
+        "desviacion_estandar": 97.5932,
+        "max": 961.0,
+        "min": 2.0,
+        "rango": 959.0
+      },
+      "PM2.5": {
+        "desviacion_estandar": 85.976,
+        "max": 999.0,
+        "min": 3.0,
+        "rango": 996.0
+      },
+      "PRES": {
+        "desviacion_estandar": 10.5709,
+        "max": 1042.0,
+        "min": 985.1,
+        "rango": 56.9
+      },
+      "RAIN": {
+        "desviacion_estandar": 0.797,
+        "max": 46.4,
+        "min": 0.0,
+        "rango": 46.4
+      },
+      "SO2": {
+        "desviacion_estandar": 23.9408,
+        "max": 411.0,
+        "min": 0.2856,
+        "rango": 410.7144
+      },
+      "TEMP": {
+        "desviacion_estandar": 11.3852,
+        "max": 40.6,
+        "min": -16.8,
+        "rango": 57.4
+      },
+      "WSPM": {
+        "desviacion_estandar": 1.2064,
+        "max": 13.2,
+        "min": 0.0,
+        "rango": 13.2
+      }
+    },
+    "variables_excluidas_por_ser_indice_o_temporales": [
+      "No",
+      "day",
+      "hour",
+      "month",
+      "year"
+    ],
+    "variables_numericas_evaluadas": [
+      "PM2.5",
+      "PM10",
+      "SO2",
+      "NO2",
+      "CO",
+      "O3",
+      "TEMP",
+      "PRES",
+      "DEWP",
+      "RAIN",
+      "WSPM"
+    ]
+  },
+  "historial_acciones": [
+    {
+      "fecha": "2026-08-27T00:03:15",
+      "accion": "inicio_fase_2"
+    },
+    {
+      "fecha": "2026-08-27T00:03:19",
+      "accion": "evaluar_estrategia",
+      "propuesta": ".",
+      "porcentaje": 0,
+      "estado": "ERROR",
+      "nivel": "NIVEL 2: Consecuencias y Reflexión",
+      "feedback": "PORCENTAJE_CUMPLIMIENTO: [0]\nESTADO: [ERROR]\nNIVEL_ACTIVADO: [NIVEL 2: Consecuencias y Reflexión]\nFEEDBACK_GUIA: Si se dejan sin tratar, los valores vacíos pueden producir análisis incompletos o sesgados; los valores atípicos pueden distorsionar patrones y resultados; las escalas diferentes pueden hacer que ciertos métodos den más peso a variables con rangos mayores y menos a otras; y la fecha/hora sin combinar dificulta cualquier estudio temporal o series de tiempo. ¿Qué pasos incluirías en tu estrategia para manejar estos aspectos?",
+      "opcion_correcta": null
+    },
+    {
+      "fecha": "2026-08-27T00:03:22",
+      "accion": "evaluar_estrategia",
+      "propuesta": ".",
+      "porcentaje": 0,
+      "estado": "ERROR",
+      "nivel": "NIVEL 3: Recomendar Alternativas",
+      "feedback": "PORCENTAJE_CUMPLIMIENTO: [0]\nESTADO: [ERROR]\nNIVEL_ACTIVADO: [NIVEL 3: Recomendar Alternativas]\nFEEDBACK_GUIA: 1. Eliminar o rellenar los valores vacíos, corregir los valores atípicos, escalar variables numéricas y crear una columna datetime con año, mes, día y hora.\n2. Rellenar los valores vacíos y crear la columna datetime, sin tratar outliers ni escalar.\n3. Ignorar los valores vacíos y los outliers, usar las variables tal cual sin crear fecha/hora.\nOPCION_CORRECTA: [1]",
+      "opcion_correcta": 1
+    },
+    {
+      "fecha": "2026-08-27T00:03:32",
+      "accion": "eleccion_nivel_3",
+      "eleccion": "1"
+    },
+    {
+      "fecha": "2026-08-27T00:03:32",
+      "accion": "fin_fase_2",
+      "estado": "alternativa_correcta"
+    }
+  ]
+}

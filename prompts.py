@@ -199,3 +199,125 @@ def obtener_prompt_prescripcion_pregunta(preguntas, taxonomia):
 
     No inventes resultados, datos ni variables.
     """
+
+def obtener_prompt_evaluacion_fase2(
+    variables_contexto,
+    diagnostico_calidad,
+    analisis_escalado_transformacion,
+    intento_fallido,
+    propuesta_usuario,
+    nivel_forzado=None,
+):
+    return f"""
+Eres el Motor de Guidance Contextual y Tutor Metodológico de un sistema de
+análisis de datos en la Fase 2.
+
+IMPORTANTE: NO realizas cálculos ni análisis de datos en crudo. Recibes un
+resumen matemático exacto procesado previamente por Python/Pandas. Tu única
+tarea es evaluar la estrategia del usuario y aplicar el andamiaje pedagógico
+respetando estrictamente el nivel de ayuda correspondiente.
+
+CONTEXTO TÉCNICO PROPORCIONADO POR PYTHON:
+- Variables y tipos disponibles: {variables_contexto}
+- Diagnóstico de calidad: {diagnostico_calidad}
+- Análisis de escalado/transformación: {analisis_escalado_transformacion}
+- Número de intento fallido actual: {intento_fallido}
+- Propuesta escrita por el usuario: {propuesta_usuario}
+
+CONTROL DEL FLUJO: {f"Debes activar exactamente {nivel_forzado}." if nivel_forzado else "Aplica las reglas según el intento."}
+
+IDIOMA Y VOCABULARIO: responde exclusivamente en español sencillo. No uses las
+palabras `imputación`, `IQR`, `media`, `mediana`, `estandarización` ni nombres
+de algoritmos. Usa expresiones simples como `valores vacíos`, `valores atípicos`,
+`escalas diferentes` y `fecha/hora`.
+
+INSTRUCCIONES DE EVALUACIÓN Y NIVELES:
+Antes de elegir un nivel, asigna PORCENTAJE_CUMPLIMIENTO de 0 a 100 según cuánto
+cubre la propuesta: nulos, outliers, normalización/escalado cuando corresponde y
+transformación temporal cuando corresponde.
+
+1. Si la estrategia es lógica, coherente con los datos y aborda correctamente la
+   limpieza y las decisiones de normalización/transformación necesarias:
+   - PORCENTAJE_CUMPLIMIENTO: [100]
+   - ESTADO: [EXITO]
+   - NIVEL_ACTIVADO: [NINGUNO]
+   - FEEDBACK_GUIA: felicita la estrategia y anímalo a pasar a la Fase 3.
+
+2. Si la propuesta cubre al menos 50% pero no está completa:
+   - PORCENTAJE_CUMPLIMIENTO: [50 a 99]
+   - ESTADO: [ERROR]
+   - NIVEL_ACTIVADO: [NIVEL 1: Información y Observación]
+   - FEEDBACK_GUIA: reconoce qué elementos sí incluyó; señala solo lo que falta
+     observar en los diagnósticos de nulos, outliers, escalado o transformación
+     temporal. No des recomendaciones ni una solución. Formula una pregunta para
+     que complete su estrategia.
+
+3. Si la propuesta cubre menos de 50% o no hubo propuesta dentro del tiempo y es
+   su primer fallo (intento_fallido = 0):
+   - PORCENTAJE_CUMPLIMIENTO: [0 a 49]
+   - ESTADO: [ERROR]
+   - NIVEL_ACTIVADO: [NIVEL 2: Consecuencias y Reflexión]
+   - FEEDBACK_GUIA: NO recomiendes técnicas ni soluciones. No menciones
+     métodos ni nombres técnicos. Para TODAS las alertas presentes, explica únicamente
+     qué podría ocurrir si se dejan sin tratar: nulos, outliers, escalas
+     diferentes y fechas sin transformar. Cierra con una pregunta para que el
+     estudiante proponga su propia estrategia. No menciones alertas ausentes.
+
+IMPORTANTE: menciona únicamente alertas que estén presentes en el contexto de
+Python. Si no existen nulos, outliers, escalas diferentes o una transformación
+temporal necesaria, no los menciones como problemas.
+
+4. Si vuelve a obtener menos de 50% tras la reflexión del Nivel 2
+   (intento_fallido = 1):
+   - PORCENTAJE_CUMPLIMIENTO: [0 a 49]
+   - ESTADO: [ERROR]
+   - NIVEL_ACTIVADO: [NIVEL 3: Recomendar Alternativas]
+   - FEEDBACK_GUIA: ofrece exactamente tres alternativas numeradas, cortas y
+     sin explicaciones adicionales. SOLO UNA debe ser metodológicamente correcta
+     y cubrir todas las alertas presentes. Las otras dos deben ser estrategias
+     incompletas o riesgosas plausibles. No uses ejemplos técnicos ni expliques
+     las alternativas.
+     El formato del feedback debe ser únicamente:
+     1. <alternativa corta>
+     2. <alternativa corta>
+     3. <alternativa corta>
+   - Después del FEEDBACK_GUIA añade esta línea interna obligatoria:
+     OPCION_CORRECTA: [1, 2 o 3]
+
+5. Si sigue con menos de 50% o hay timeout después de ver las alternativas del
+   Nivel 3 (intento_fallido >= 2):
+   - PORCENTAJE_CUMPLIMIENTO: [0 a 49]
+   - ESTADO: [ERROR]
+   - NIVEL_ACTIVADO: [NIVEL 4: Prescribir Plan]
+   - FEEDBACK_GUIA: escribe directamente `Tu plan será:` y proporciona el plan
+     metodológico exacto. Debe incluir qué hacer con todas las variables
+     afectadas por nulos, outliers, normalización y transformación temporal.
+     Explica brevemente por qué cada acción del plan es necesaria. No hagas
+     preguntas ni solicites confirmación.
+
+DEVUELVE ÚNICAMENTE ESTE FORMATO, SIN TEXTO ANTES NI DESPUÉS:
+PORCENTAJE_CUMPLIMIENTO: [0-100]
+ESTADO: [EXITO o ERROR]
+NIVEL_ACTIVADO: [...]
+FEEDBACK_GUIA: [...]
+OPCION_CORRECTA: [solo cuando NIVEL_ACTIVADO sea NIVEL 3; de lo contrario omitir]
+"""
+
+
+def obtener_prompt_explicacion_alternativa_correcta_fase2(
+    alternativa, diagnostico_calidad, analisis_escalado_transformacion
+):
+    return f"""
+Eres un tutor metodológico. El estudiante eligió correctamente esta alternativa
+en la Fase 2:
+{alternativa}
+
+Contexto calculado por Python:
+- Diagnóstico de calidad: {diagnostico_calidad}
+- Escalado y transformación: {analisis_escalado_transformacion}
+
+Explica en español sencillo por qué la alternativa es correcta y cómo ayuda a
+dejar el dataset listo para el análisis. Relaciónala únicamente con las alertas
+que estén presentes. No uses nombres de métodos, algoritmos ni términos como
+imputación, IQR, media, mediana o estandarización. No inventes alertas.
+"""

@@ -1,0 +1,86 @@
+{
+  "fase_activa": "Datos / Data Understanding",
+  "tiempo_limite_segundos": 30,
+  "variables": {
+    "categoricas": [
+      "wd",
+      "station"
+    ],
+    "numericas": [
+      "No",
+      "PM2.5",
+      "PM10",
+      "SO2",
+      "NO2",
+      "CO",
+      "O3",
+      "TEMP",
+      "PRES",
+      "DEWP",
+      "RAIN",
+      "WSPM"
+    ],
+    "temporales": [
+      "year",
+      "month",
+      "day",
+      "hour"
+    ]
+  },
+  "preguntas_usuario": [
+    "1",
+    "2",
+    "¿Cómo varía el nivel de NO2 según la dirección del viento (wd) y la hora del día?"
+  ],
+  "preguntas_sugeridas": [
+    "¿Existe una relación entre la concentración de PM2.5 y la temperatura (TEMP) en cada estación durante los diferentes meses del año?",
+    "¿Cómo varía el nivel de NO2 según la dirección del viento (wd) y la hora del día?",
+    "¿Existe una relación entre la precipitación (RAIN) y la concentración de O3 a lo largo de las estaciones del año?"
+  ],
+  "historial_acciones": [
+    {
+      "fecha": "2026-08-26T21:03:56",
+      "accion": "inicio_fase",
+      "estado": "activa",
+      "detalle": "Variables cargadas desde la API"
+    },
+    {
+      "fecha": "2026-08-26T21:04:07",
+      "accion": "nivel_1",
+      "estado": "no_viable",
+      "pregunta": "1",
+      "detalle": "⚠️ La pregunta necesita precisión.  \nPara poder responder se necesita saber qué aspecto del conjunto de datos quieres analizar (por ejemplo, “¿Cuál es la relación entre la concentración de PM2.5 y la temperatura?” o “¿Qué estación registra mayor nivel de O3?”). Dependiendo de la pregunta, las variables que podrían servir son las categóricas `wd`, `station`, las numéricas como `PM2.5`, `O3`, `TEMP`, y las temporales `year`, `month`, `day`, `hour`."
+    },
+    {
+      "fecha": "2026-08-26T21:04:11",
+      "accion": "describir_variables",
+      "estado": "completada",
+      "detalle": "**Temporales**  \n- `year`: año en que se registró el dato.  \n- `month`: mes del año del registro.  \n- `day`: día del mes del registro.  \n- `hour`: hora del día (0‑23) en que se tomó la medición.  \n\n**Numéricas**  \n- `No`: número de registro o identificación del punto de medición.  \n- `PM2.5`: concentración de partículas con diámetro ≤ 2.5 µm (µg/m³).  \n- `PM10`: concentración de partículas con diámetro ≤ 10 µm (µg/m³).  \n- `SO2`: concentración de dióxido de azufre (µg/m³).  \n- `NO2`: concentración de dióxido de nitrógeno (µg/m³).  \n- `CO`: concentración de monóxido de carbono (ppm o mg/m³).  \n- `O3`: concentración de ozono (µg/m³).  \n- `TEMP`: temperatura ambiente (°C).  \n- `PRES`: presión atmosférica (hPa).  \n- `DEWP`: punto de rocío (°C).  \n- `RAIN`: precipitación acumulada (mm).  \n- `WSPM`: velocidad del viento (m/s).  \n\n**Categóricas**  \n- `wd`: dirección de la velocidad del viento (por ejemplo, N, NE, etc.).  \n- `station`: identificador de la estación de monitoreo (tipo de ubicación)."
+    },
+    {
+      "fecha": "2026-08-26T21:04:14",
+      "accion": "nivel_2",
+      "estado": "no_viable",
+      "pregunta": "2",
+      "detalle": "⚠️ La pregunta necesita precisión.  \nNo se entiende qué información específica busca el estudiante: ¿una estadística sobre la variable 2, un análisis de la variable “No” (número de mediciones), o una relación entre alguna variable y la segunda columna?  \nPara poder contestar, aclara cuál es el objetivo (por ejemplo, “¿Cuál es la media de PM2.5 en la estación 2?” o “¿Qué tendencia temporal tiene la variable 2?”).  \nVariables que podrían servir dependen de la pregunta:  \n- Si se trata de una medida de calidad del aire: `PM2.5`, `PM10`, `SO2`, `NO2`, `CO`, `O3`.  \n- Si se refiere a la estación: `wd`, `station`.  \n- Para análisis temporal: `year`, `month`, `day`, `hour`."
+    },
+    {
+      "fecha": "2026-08-26T21:04:19",
+      "accion": "nivel_3",
+      "estado": "preguntas_sugeridas",
+      "detalle": "1. ¿Existe una relación entre la concentración de PM2.5 y la temperatura (TEMP) en cada estación durante los diferentes meses del año?  \n   Motivo: Conecta PM2.5, TEMP, station y month, y permite evaluar cómo el calor afecta la calidad del aire.  \n\n2. ¿Cómo varía el nivel de NO2 según la dirección del viento (wd) y la hora del día?  \n   Motivo: Conecta NO2, wd y hour, y ayuda a comprender el transporte y dispersión de contaminantes según el viento y la temporalidad.  \n\n3. ¿Existe una relación entre la precipitación (RAIN) y la concentración de O3 a lo largo de las estaciones del año?  \n   Motivo: Conecta RAIN, O3 y year, y sirve para estudiar el efecto de la lluvia sobre la formación de ozono."
+    },
+    {
+      "fecha": "2026-08-26T21:04:26",
+      "accion": "nivel_4",
+      "estado": "pregunta_prescrita",
+      "pregunta": "¿Cómo varía el nivel de NO2 según la dirección del viento (wd) y la hora del día?",
+      "detalle": "ELECCION: 2  \nJUSTIFICACION: Analizar cómo varía el nivel de NO2 en función de la dirección del viento (wd) y la hora del día permite identificar la influencia de fuentes locales (por ejemplo, tráfico vehicular) y los patrones de transporte atmosférico. Este enfoque combina variables categóricas y temporales, lo que facilita la detección de episodios de alta contaminación, la evaluación de la eficacia de medidas de control y la planificación de estrategias de gestión del aire más precisas."
+    },
+    {
+      "fecha": "2026-08-26T21:04:26",
+      "accion": "fin_fase_1",
+      "estado": "completada"
+    }
+  ]
+}

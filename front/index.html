@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Understanding | Fase 1</title>
+    <link rel="stylesheet" href="/front/styles.css" />
+    <!-- D3 queda disponible para las visualizaciones que añadas después. -->
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar">
+        <div class="brand"><span class="brand-mark">◈</span> Data Tutor</div>
+        <p class="eyebrow">FASE ACTIVA</p>
+        <h1>Comprensión del dataset</h1>
+        <p class="sidebar-copy">Formula una duda y recibe orientación basada en las variables reales del CSV.</p>
+        <ol class="levels" aria-label="Progreso de la fase">
+          <li data-level="1"><span>01</span> Preguntar y validar</li>
+          <li data-level="2"><span>02</span> Orientar con variables</li>
+          <li data-level="3"><span>03</span> Sugerir consultas</li>
+          <li data-level="4"><span>04</span> Prescribir una ruta</li>
+        </ol>
+        <div class="session-card"><span>Sesión</span><strong id="session-status">Preparando contexto…</strong></div>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div><p class="eyebrow">ASISTENTE PEDAGÓGICO</p><h2>Explora tu CSV con propósito</h2></div>
+          <div class="timer" id="timer" aria-live="polite"><span>Tiempo</span><strong>00:30</strong></div>
+        </header>
+
+        <section class="conversation" id="conversation" aria-live="polite"></section>
+        <section class="interaction" id="interaction"></section>
+        <section class="history-panel">
+          <button class="history-toggle" id="history-toggle" type="button">Ver historial de esta sesión <span>⌄</span></button>
+          <ol id="history" class="history is-hidden"></ol>
+        </section>
+      </section>
+    </main>
+    <template id="question-template">
+      <form class="question-form">
+        <label for="question-input">Escribe tu pregunta o duda</label>
+        <div class="input-row"><input id="question-input" autocomplete="off" placeholder="Ej. ¿Cómo cambia PM2.5 según la temperatura?" required /><button type="submit">Analizar <span>→</span></button></div>
+        <p class="hint">El sistema valida si esta pregunta puede responderse con tu dataset.</p>
+      </form>
+    </template>
+    <script src="/front/app.js"></script>
+  </body>
+</html>
